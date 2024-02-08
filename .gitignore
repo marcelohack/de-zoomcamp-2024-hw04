@@ -1,0 +1,6 @@
+**/*.parquet
+**/*.csv
+creds/
+gcp_stack/*.tfstate*
+gcp_stack/.terraform/
+gcp_stack/.terraform.lock.hcl
