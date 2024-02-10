@@ -1,5 +1,7 @@
+
+
 {{ config(materialized='view') }}
- 
+
 with tripdata as 
 (
   select *,
@@ -8,8 +10,13 @@ with tripdata as
   where vendorid is not null 
 )
 select
-   -- identifiers
-    {{ dbt_utils.generate_surrogate_key(['vendorid', 'tpep_pickup_datetime']) }} as tripid,    
+
+    -- identifiers
+    {{ dbt_utils.generate_surrogate_key(['vendorid', 'tpep_pickup_datetime']) }} as tripid,
+    -- cast(vendorid as integer) as vendorid,
+    -- cast(ratecodeid as integer) as ratecodeid,
+    -- cast(pulocationid as integer) as pickup_locationid,
+    -- cast(dolocationid as integer) as dropoff_locationid,
     {{ dbt.safe_cast("vendorid", api.Column.translate_type("integer")) }} as vendorid,
     {{ dbt.safe_cast("ratecodeid", api.Column.translate_type("integer")) }} as ratecodeid,
     {{ dbt.safe_cast("pulocationid", api.Column.translate_type("integer")) }} as pickup_locationid,
@@ -21,11 +28,12 @@ select
     
     -- trip info
     store_and_fwd_flag,
+    -- cast(passenger_count as integer) as passenger_count,
     {{ dbt.safe_cast("passenger_count", api.Column.translate_type("integer")) }} as passenger_count,
     cast(trip_distance as numeric) as trip_distance,
-    -- yellow cabs are always street-hail
+    -- cast(trip_type as integer) as trip_type,
     1 as trip_type,
-    
+
     -- payment info
     cast(fare_amount as numeric) as fare_amount,
     cast(extra as numeric) as extra,
@@ -35,12 +43,14 @@ select
     cast(0 as numeric) as ehail_fee,
     cast(improvement_surcharge as numeric) as improvement_surcharge,
     cast(total_amount as numeric) as total_amount,
+    -- cast(payment_type as integer) as payment_type,
     coalesce({{ dbt.safe_cast("payment_type", api.Column.translate_type("integer")) }},0) as payment_type,
-    {{ get_payment_type_description('payment_type') }} as payment_type_description
+    {{ get_payment_type_description("payment_type") }} as payment_type_description
+
 from tripdata
 where rn = 1
 
--- dbt build --select <model.sql> --vars '{'is_test_run: false}'
+-- dbt build --select stg_yellow_tripdata --vars '{'is_test_run': 'false'}'
 {% if var('is_test_run', default=true) %}
 
   limit 100
