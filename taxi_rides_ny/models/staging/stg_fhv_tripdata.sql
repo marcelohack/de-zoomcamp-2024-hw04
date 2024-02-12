@@ -1,15 +1,8 @@
-{{
-    config(
-        materialized='view'
-    )
-}}
+{{ config(materialized='view') }}
 
 with tripdata as 
 (
-  select *,
-    row_number() over(partition by dispatching_base_num, pickup_datetime) as rn
-  from {{ source('staging','fhv_tripdata') }}
-  where dispatching_base_num is not null 
+  select * from {{ source('staging','fhv_tripdata') }} where extract(year from cast(pickup_datetime as timestamp)) = 2019
 )
 select
     -- identifiers
@@ -26,7 +19,7 @@ select
     sr_flag,
     affiliated_base_number
 from tripdata
-where rn = 1
+where dispatching_base_num is not null 
 
 
 -- dbt build --select <model_name> --vars '{'is_test_run': 'false'}'
