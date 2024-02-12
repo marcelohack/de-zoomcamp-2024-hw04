@@ -1,3 +1,4 @@
+setenv.sh
 creds/
 gcp_stack/*.tfstate*
 gcp_stack/.terraform/

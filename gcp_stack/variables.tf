@@ -8,7 +8,7 @@ variable "credentials" {
 variable "project" {
   description = "Project"
   #Update the below to your desired project
-  default = "de-zoomcamp-412103"
+  default = "de-zoomcamp"
 }
 
 variable "region" {
